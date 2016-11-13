@@ -9,7 +9,7 @@
 
 using namespace std;
 
-double test(double* a, double* b, int n);
+double test(double* a, double* b, int n,int* f);
 
 int main(int argc, char* argv[])
 {
@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
 	MPI_Status status;
 	char size[100];
 	double h,h1,h2;
+	int* fi; 
 	double* k1,*k2,*k3,*k4, *buf;
 
     p = atoi(argv[1]);
@@ -36,6 +37,7 @@ int main(int argc, char* argv[])
 	k2 = new double[n];
 	k3 = new double[n];
 	k4 = new double[n];
+	fi = new int[n];
 	b = new double*[n];
 	buf2 = new double*[p];
 	buf = new double[n/p*2];
@@ -47,6 +49,10 @@ int main(int argc, char* argv[])
 	    {
 			b[i][j] =  rand()%5 - 5;
 		}
+	}
+	for(int i = 0; i <= n - 1; i++)
+	{
+		fi[i] = rand()%5;
 	}
 	for(int i = 0; i <= nc-1; i++)
 	{
@@ -76,7 +82,7 @@ int main(int argc, char* argv[])
 	{
 			for(int j = n/p*len; j <= n/p*(len+1) - 1; j++)
 	        {
-				k1[j] = test(y[i],b[j],n);
+				k1[j] = test(y[i],b[j],n,fi);
 				y[i+1][j] = y[i][j] + k1[j]*h/6;
 				k1[j] = y[i][j] + h*k1[j]/2;
 				buf[j - n/p*len] = y[i+1][j];
@@ -103,7 +109,7 @@ int main(int argc, char* argv[])
 			}
 			for(int j = n/p*len; j <= n/p*(len+1) - 1; j++)
 	        {
-				k2[j] = test(k1,b[j],n);
+				k2[j] = test(k1,b[j],n,fi);
 				y[i+1][j] = y[i+1][j] + 2*k2[j]*h/6;
 				k2[j] = y[i][j] + h*k2[j]/2;
 				buf[j - n/p*len] = y[i+1][j];
@@ -131,7 +137,7 @@ int main(int argc, char* argv[])
 
 			for(int j = n/p*len; j <= n/p*(len+1) - 1; j++)
 	        {
-				k3[j] = test(k2,b[j],n);
+				k3[j] = test(k2,b[j],n,fi);
 				y[i+1][j] = y[i+1][j] + 2*k3[j]*h/6;
 				k3[j] = y[i][j] + h*k3[j];
 				buf[j - n/p*len] = y[i+1][j];
@@ -159,7 +165,7 @@ int main(int argc, char* argv[])
 
 			for(int j = n/p*len; j <= n/p*(len+1) - 1; j++)
 	        {
-				k4[j] = test(k3,b[j],n);
+				k4[j] = test(k3,b[j],n,fi);
 			    y[i+1][j] = y[i+1][j] + k4[j]*h/6;
 				buf[j - n/p*len] = y[i+1][j];
 				buf[j-n/p*(len - 1)] = k4[j];
@@ -216,6 +222,7 @@ int main(int argc, char* argv[])
 	delete(k4);
 	delete(buf);
 	delete(buf2);
+	delete(fi);
 	MPI_Finalize();
     if(len == 0)
 	{fout << "runtime = " << clock()/1000.0 << endl;
@@ -223,7 +230,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-double test(double* a, double* b, int n)
+double test(double* a, double* b, int n, int* f)
 {
 	int i;
 	double s = 0;
@@ -231,7 +238,7 @@ double test(double* a, double* b, int n)
     int fi;
 	for(i = 0; i <= n-1; i++)
 	{
-           fi = rand()%5;
+           fi = f[i];
            if (fi == 4)
 	   {s += a[i] * b[i];}
            else
