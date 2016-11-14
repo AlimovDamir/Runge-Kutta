@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 		b[i] = new double[n];
 		for(int j = 0; j <= n - 1; j++)
 	    {
-			b[i][j] =  rand()%5 - 5;
+			b[i][j] =  -0.00001*j;
 		}
 	}
 	for(int i = 0; i <= n - 1; i++)
@@ -62,6 +62,10 @@ int main(int argc, char* argv[])
 	{
 		y[0][i] = rand()%10 + 1.5;
 	}
+	for(int i = 0; i <= p - 1; i++)
+	{
+		buf2[i] = new double[n/p*2];
+	}
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &len);
     char lent[50];
@@ -70,13 +74,24 @@ int main(int argc, char* argv[])
         fout.open(lent); 
         fout<<p<<endl;
         fout<<n<<endl;
-    }
-	for(int i = 0; i <= p - 1; i++)
-	{
-		if (i != len)
+		for(int i = 0; i <= n - 1; i++)
+	    {
+		fi[i] = rand()%5;
+	    }
+		for(int i = 0; i <= n - 1; i++)
+	    {
+		y[0][i] = rand()%10 + 1.5;
+	    }
+		for(int kj = 1; kj <= p-1; kj++)
 		{
-			buf2[i] = new double[n/p*2];
+            MPI_Send(y[0],n,MPI_DOUBLE,kj,kj,MPI_COMM_WORLD);
+			MPI_Send(fi,n,MPI_INT,kj,kj+p,MPI_COMM_WORLD);
 		}
+    }
+	else
+	{
+		MPI_Recv(y[0],n,MPI_DOUBLE,0,len,MPI_COMM_WORLD,&status);
+		MPI_Recv(fi,n,MPI_INT,0,len + p,MPI_COMM_WORLD,&status);
 	}
 	for(int i = 0; i <= nc - 2; i++)
 	{
@@ -199,34 +214,29 @@ int main(int argc, char* argv[])
 	fout<<bufout;
 	sprintf(bufout,"%d\n", len);
 	fout<<bufout;}
-	for(int i = 0; i <= nc - 1; i++)
-	{
-		delete(y[i]);
-	}
-	for(int i = 0; i <= n - 1 ; i++)
-	{
-		delete(b[i]);
-	}
-	for(int i = 0; i <= n - 1 ; i++)
-	{
-		if (i != len)
-		{
-			delete(buf2[i]);
-		}
-	}
-	delete(b);
-	delete(y);
-	delete(k1);
-	delete(k2);
-	delete(k3);
-	delete(k4);
-	delete(buf);
-	delete(buf2);
-	delete(fi);
 	MPI_Finalize();
     if(len == 0)
 	{fout << "runtime = " << clock()/1000.0 << endl;
 	fout.close();}
+	for(int i = 0; i <= nc - 1; i++)
+	{
+		delete[] y[i];
+	}
+	for(int i = 0; i <= n - 1 ; i++)
+	{
+		delete[] b[i];
+	}
+	for(int i = 0; i <= n - 1 ; i++)
+	{
+		delete[] buf2[i];
+	}
+	delete[] k1;
+	delete[] k2;
+	delete[] k3;
+	delete[] k4;
+	delete[] buf;
+	delete[] buf2;
+	delete[] fi;
 	return 0;
 }
 
