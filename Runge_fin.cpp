@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 	double** b;
 	double** buf2; 
 	int t_0 = 0;
-	int t_1 = 2;
+	int t_1 = 0.5;
 	int nc = 500;
 	int p = 4;
 	int len;
@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
 	{
 		delete[] b[i];
 	}
-	for(int i = 0; i <= n - 1 ; i++)
+	for(int i = 0; i <= p - 1 ; i++)
 	{
 		delete[] buf2[i];
 	}
