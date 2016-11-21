@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
 	int n = 400;
 	double** b;
 	double** buf2; 
-	int t_0 = 0;
-	int t_1 = 0.5;
+	double t_0 = 0;
+	double t_1 = 0.5;
 	int nc = 500;
 	int p = 4;
 	int len;
